@@ -1,0 +1,25 @@
+[project]
+name = "odversa-spatial-mesh"
+version = "0.1.0"
+description = "Odversa Spatial Mesh - reconstruccion espacial 3D en tiempo real desde la camara del movil"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=2.0",
+    "opencv-python-headless>=4.10",
+    "onnxruntime>=1.20",
+    "scikit-image>=0.24",
+    # Delaunay para la malla adaptativa. Ya venia arrastrado por scikit-image,
+    # pero se declara aparte: es una dependencia directa, no un accidente.
+    "scipy>=1.13",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "websockets>=13",
+    "huggingface_hub>=0.26",
+]
+
+[project.optional-dependencies]
+# Backend de profundidad alternativo (PyTorch/MPS). No hace falta para el MVP.
+torch = ["torch>=2.4", "transformers>=4.45"]
+
+[tool.ruff]
+line-length = 110

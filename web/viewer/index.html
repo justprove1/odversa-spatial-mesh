@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ODVERSA SPATIAL MESH</title>
+<link rel="stylesheet" href="/static/viewer/styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <h1>ODVERSA SPATIAL MESH</h1>
+    <p>ANÁLISIS ESPACIAL EN TIEMPO REAL</p>
+  </div>
+
+  <div class="modes-group">
+    <span class="modes-label">MODO VISUALIZACIÓN:</span>
+    <nav class="modes" id="modes">
+      <button data-mode="real-mesh" class="active">REAL + MALLA</button>
+      <button data-mode="mesh">SOLO MALLA</button>
+      <button data-mode="real">SOLO REAL</button>
+    </nav>
+  </div>
+
+  <div class="search-group">
+    <input id="search-input" type="search" placeholder="Buscar objeto… p. ej. vitrina"
+           autocomplete="off" spellcheck="false">
+    <span class="search-status" id="search-status"></span>
+  </div>
+
+  <div class="card conn">
+    <div class="conn-row">CONECTADO A: <b id="c-device">—</b></div>
+    <div class="conn-row">ESTADO: <b id="c-state">Sin señal</b><i class="dot" id="c-dot"></i></div>
+  </div>
+</header>
+
+<main class="views" id="views">
+  <section class="card view" id="view-a">
+    <header class="view-title">A) MODO REAL + MALLA</header>
+    <div class="view-body" id="body-a">
+      <canvas id="video-canvas"></canvas>
+    </div>
+  </section>
+
+  <section class="card view" id="view-b">
+    <header class="view-title">B) MODO MALLA (DIMENSIONAL)</header>
+    <div class="view-body" id="body-b"></div>
+  </section>
+
+  <!-- Un unico lienzo WebGL cubre las dos vistas y se dibuja por regiones. -->
+  <canvas id="gl-canvas"></canvas>
+
+  <div class="waiting" id="waiting">
+    <div class="waiting-card card">
+      <div class="qr-tile">
+        <img class="qr" id="qr" src="/api/qr.svg" alt="Código QR con la dirección de captura">
+      </div>
+      <div class="waiting-text">
+        <h2>ESPERANDO CÁMARA</h2>
+        <p>Escanea el código <b>con el móvil</b> y pulsa <b>ABRIR CÁMARA</b>.</p>
+        <p class="sub"><b id="phone-http">http://…/phone</b></p>
+        <p class="sub">Directo por https: <b id="phone-url">https://…/phone</b></p>
+        <p class="sub muted">Acepta el aviso de certificado: es el autofirmado de este
+          ordenador. Esta página va en el teléfono, no aquí: en el ordenador
+          usaría su webcam.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="panels">
+  <section class="card panel">
+    <header class="panel-title">ESTADÍSTICAS</header>
+    <div class="rows">
+      <div class="row"><span>FPS</span><b id="s-fps">0</b></div>
+      <div class="row"><span>Latencia</span><b id="s-lat">0 ms</b></div>
+      <div class="row"><span>Puntos</span><b id="s-points">0</b></div>
+      <div class="row"><span>Triángulos</span><b id="s-tris">0</b></div>
+      <div class="row"><span>Resolución malla</span><b id="s-grid">—</b></div>
+      <div class="row"><span>Tracking</span><b id="s-track">—</b></div>
+    </div>
+  </section>
+
+  <section class="card panel">
+    <header class="panel-title">CONTROL MALLA</header>
+    <div class="presets" id="presets">
+      <button data-preset="fast">RÁPIDO</button>
+      <button data-preset="balanced" class="on">EQUILIBRADO</button>
+      <button data-preset="detail">DETALLE</button>
+    </div>
+    <label class="ctl">
+      <span>Densidad<i id="v-density">224</i></span>
+      <input type="range" id="c-density" min="64" max="320" step="8" value="224">
+    </label>
+    <label class="ctl">
+      <span>Resolución<i id="v-res">308</i></span>
+      <input type="range" id="c-res" min="266" max="518" step="14" value="308">
+    </label>
+    <label class="ctl">
+      <span>Detalle mínimo<i id="v-detailcm">1.2 cm</i></span>
+      <input type="range" id="c-detailcm" min="0.4" max="4" step="0.2" value="1.2">
+    </label>
+    <label class="ctl">
+      <span>Suavizado<i id="v-smooth">0.25</i></span>
+      <input type="range" id="c-smooth" min="0" max="1" step="0.05" value="0.25">
+    </label>
+    <label class="ctl">
+      <span>Relieve fino<i id="v-detail">0.45</i></span>
+      <input type="range" id="c-detail" min="0" max="1" step="0.05" value="0.45">
+    </label>
+    <button id="a-reset" class="danger">REINICIAR MAPA / MALLA</button>
+  </section>
+
+  <section class="card panel">
+    <header class="panel-title">INFORMACIÓN</header>
+    <p class="info" id="info-text">
+      Sistema reconstruyendo el entorno en tiempo real.
+      Mueve la cámara para actualizar la malla.
+    </p>
+    <div class="surfaces" id="surfaces"><span class="none">detectando superficies…</span></div>
+    <label class="ctl">
+      <span>Escala<i id="v-near">1.0 m</i></span>
+      <input type="range" id="c-near" min="0.3" max="4" step="0.1" value="1.0">
+    </label>
+    <label class="ctl">
+      <span>Alcance<i id="v-far">8.0 m</i></span>
+      <input type="range" id="c-far" min="2" max="30" step="0.5" value="8">
+    </label>
+    <label class="ctl">
+      <span>Corte de bordes<i id="v-edge">0.055</i></span>
+      <input type="range" id="c-edge" min="0.01" max="0.2" step="0.005" value="0.055">
+    </label>
+    <label class="ctl">
+      <span>Estabilidad<i id="v-temporal">0.55</i></span>
+      <input type="range" id="c-temporal" min="0" max="0.9" step="0.05" value="0.55">
+    </label>
+    <div class="actions">
+      <button id="t-mesh" class="toggle on">MALLA ACTIVA</button>
+      <button id="t-orbit" class="toggle">ÓRBITA</button>
+      <button id="a-save">GUARDAR MAPA 3D</button>
+    </div>
+    <p class="note" id="note"></p>
+  </section>
+
+  <section class="card panel">
+    <header class="panel-title">TRACKING CÁMARA</header>
+    <div class="rows">
+      <div class="row"><span>Posición</span><b id="t-pos" class="mono">—</b></div>
+      <div class="row"><span>Rotación</span><b id="t-rot" class="mono">—</b></div>
+      <div class="row"><span>Estado</span><b id="t-state">—</b></div>
+    </div>
+    <canvas id="track-canvas" class="track-viz"></canvas>
+    <p class="note" id="track-note"></p>
+  </section>
+</footer>
+
+<script type="module" src="/static/viewer/main.js"></script>
+</body>
+</html>

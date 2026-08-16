@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "odversa-dev",
+      "runtimeExecutable": ".venv/bin/python",
+      "runtimeArgs": ["-m", "uvicorn", "server.main:app", "--host", "127.0.0.1",
+                      "--port", "8420", "--ws-max-size", "33554432", "--log-level", "warning"],
+      "port": 8420
+    }
+  ]
+}

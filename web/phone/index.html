@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Odversa · Cámara</title>
+<link rel="stylesheet" href="/static/phone/phone.css">
+</head>
+<body>
+  <video id="video" playsinline autoplay muted></video>
+  <canvas id="scratch" hidden></canvas>
+
+  <div class="hud">
+    <div class="brand">ODVERSA<span>SPATIAL MESH</span></div>
+    <div class="state" id="state">listo</div>
+  </div>
+
+  <div class="panel">
+    <div class="metrics">
+      <div><b id="m-res">—</b><span>resolución</span></div>
+      <div><b id="m-fps">0</b><span>fps</span></div>
+      <div><b id="m-kbps">0</b><span>kB/s</span></div>
+    </div>
+    <button id="start" class="primary">ABRIR CÁMARA</button>
+    <p class="hint">La malla se ve en el ordenador. Aquí solo se captura.</p>
+  </div>
+
+  <script type="module" src="/static/phone/phone.js"></script>
+</body>
+</html>

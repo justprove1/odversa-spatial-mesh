@@ -1,0 +1,14 @@
+.DS_Store
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+.env
+.env.local
+!.env.example
+*.log
+dist/
+build/
+models/
